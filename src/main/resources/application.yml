@@ -1,0 +1,82 @@
+server:
+ port: 8081
+
+logging:
+  enabled: true
+  display-headers: true
+  display-request-headers: accept, content-type
+  display-response-headers: accept, content-type
+  level:
+    ROOT: WARN
+    com.ftd: DEBUG
+
+
+spring:
+  application:
+    name: demoapp
+
+#  data:
+#    mongodb:
+#      uri: https://data.mongodb-api.com/app/data-mcusr/endpoint/data/beta
+  main:
+    allow-bean-definition-overriding: true
+
+service:
+  metrics:
+    dropwizard:
+      enabled: false
+    prometheus:
+      enabled: false
+    jmx:
+      enabled: true
+  git:
+    enabled: true
+  https:
+    enabled: true
+  rest:
+    enabled: false
+    http-connection-config:
+      customRestTemplate:
+        max: 300
+        perRoute: 100
+        validateInactivity: 5000
+        ssl:
+          trustAllCertificates: true
+        monitor:
+          enabled: false
+          intervalSec: 30
+        retryEnabled: false
+        timeout:
+          socket: 3000
+          connect: 1000
+          ttlSec: 600
+          request: 15000
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: '*'
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  security:
+    enabled: false
+  health:
+    redis:
+      enabled: false
+    mail:
+      enabled: false
+  endpoint:
+    restart:
+      enabled: true
+
+authorization:
+    enabled: false
+
+filter:
+  includeUrls:
+    adminUrls: /.*/employees/.*$
+  enabled: true
