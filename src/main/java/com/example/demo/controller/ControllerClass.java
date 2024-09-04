@@ -1,36 +1,60 @@
 package com.example.demo.controller;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 
 import com.example.demo.aopadvice.TrackExecutionTime;
 
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Bucket;
+import io.github.bucket4j.Refill;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.websocket.server.PathParam;
 
 @RestController
-//@CrossOrigin("http://localhost:3000")
+@CrossOrigin("http://localhost:3000")
 public class ControllerClass {
 
     @Autowired
     ServiceClass serviceClass;
     @Autowired
     private ApplicationContext applicationContext;
+    private Bucket bucket;
+    
+//    @Autowired
+//    private HttpServletRequest httpServletRequest;
 
     @GetMapping("/")
     @Hidden
@@ -38,6 +62,7 @@ public class ControllerClass {
         response.sendRedirect("/swagger-ui.html");
     }
 
+    //custome annotation in aop which executes in filter for every request
     @TrackExecutionTime
     @GetMapping("/now")
     public Date dkd() {
@@ -45,14 +70,50 @@ public class ControllerClass {
 //        System.out.println("testBean:" + testBean);
         return testBean;
     }
+    
+    //rate limit
+    //https://www.youtube.com/watch?v=HYg6l0pUQwM
+    @GetMapping(value = "/rateLimit1")
+    public ResponseEntity<String> welCome1(@RequestParam(value = "id", required = false, defaultValue = "5") long id) {
 
-    @GetMapping(value = "/msg")
-    public String welCome() {
-        return "welcome to java programming";
+        Refill refill = Refill.intervally(id /* noOfReqs */, Duration.ofMinutes(1));
+//        Refill refill =Refill.of(5, Duration.ofMinutes(1));
+        bucket=Bucket.builder().addLimit(Bandwidth.classic(id, refill)).build();
+        return new ResponseEntity<String>("successfully generated string:"+bucket,HttpStatus.OK);
     }
+    
+    @GetMapping(value = "/msg")
+    public ResponseEntity<String> welCome() throws InterruptedException {
+        if(bucket.tryConsume(1)) {
+            return new ResponseEntity<String>("successfully",HttpStatus.OK);
+        }
+        return new ResponseEntity<String>("Too many requess",HttpStatus.OK);
+    }
+    
+  //ratelimiting from yml is not working
+    @GetMapping(value = "/msg1")
+    @RateLimiter(name = "service1", fallbackMethod = "welCome3")
+    public ResponseEntity<String> welCome2() throws InterruptedException {
+      System.err.println("Test");
+        return new ResponseEntity<String>("hello",HttpStatus.OK);
+    }
+    
+    @PostMapping(value = "/msg2")
+     public ResponseEntity<String> welCome3(@RequestParam String msg)  {
+       System.err.println("Test:"+msg);
+         return new ResponseEntity<String>("hello:"+msg,HttpStatus.OK);
+     }
 
-    @GetMapping(value = "/employee")
+    @GetMapping(value = "/employee", produces = { "application/xml" })
+//    @GetMapping(value = "/employee", produces = { "application/json","application/xml" })
+//    @GetMapping(value = "/employee")
     public Optional<Employee> firstService(@RequestParam long id) {
+        if(id<1) {
+            Employee employee=new Employee();
+            employee.setName("raju");
+            employee.setEmail("raju@gmail.com");
+            return Optional.of(employee);
+        }
         return serviceClass.getEmployee(id);
     }
     
@@ -74,14 +135,33 @@ public class ControllerClass {
     // https://www.youtube.com/watch?v=0Y1ECAeuw3I
     @RequestMapping(value = "/employee", method = RequestMethod.POST)
     public Employee secondService(@RequestBody Employee employee) {
-//        System.out.println("Inside POST Method:" + employee);
+//        StringBuffer g=httpServletRequest.getRequestURL();
+       // System.out.println(g+"--Inside POST Method:" + httpServletRequest.getHeader("testHead"));
+      try {
+          System.out.println("Post");
         return serviceClass.saveEmployee(employee);
+      }catch(Exception e) {
+          System.out.println("Exc:"+e.getMessage());
+          throw e;
+      }
     }
 
-    @TrackExecutionTime
+//    @TrackExecutionTime
     @GetMapping(value = "/employees")
-    public List<Employee> firstService() {
-        return serviceClass.getEmployees();
+    @RateLimiter(name = "service1", fallbackMethod = "dkd")
+    public Page<Employee> firstService(@RequestParam int pageNumber) {
+        System.out.println("Get");
+        if(pageNumber>=0) {
+        Pageable contactsPageable = PageRequest.of(pageNumber, 3,Sort.by("empId").descending());
+        
+        Page<Employee> ePages=serviceClass.findAll(contactsPageable);
+        
+        return ePages;
+        }else {
+           List<Employee> eList= serviceClass.getEmployees();
+            Page<Employee>  empPage=new PageImpl<Employee>(eList);
+            return (Page<Employee>) eList;
+        }
     }
 
     @DeleteMapping(value = "/employee")
@@ -98,6 +178,55 @@ public class ControllerClass {
 //            System.out.println("emp2:" + employee);
         }
         return employees;
+    }
+    
+    public ResponseEntity<String> rateLimiterFallback(Exception e){
+        System.err.println("e:"+e.getMessage());
+        return new ResponseEntity<String>("order service does not permit further calls", HttpStatus.TOO_MANY_REQUESTS);
+
+    }
+    
+    
+    //https://www.youtube.com/watch?v=CNGScm944Vs
+    //https://www.youtube.com/watch?v=uwTWJHREhI8
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                //Thread.sleep(3000);
+                System.out.println("Hello World");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
+    
+    @GetMapping("/timelimiter") //http://localhost:9094/api/reports/timelimiter
+    @TimeLimiter(name = "myTimeLim")
+    public CompletableFuture<Void> timeLimiter() {
+        return CompletableFuture.runAsync(runnable);
+    }
+    
+    @GetMapping("/timelimiter2") //http://localhost:9094/api/reports/timelimiter
+    @Retry(name = "allCustomer", fallbackMethod = "showError")
+//    import org.springframework.retry.annotation.Retryable;
+//    @Retryable(maxAttempts = 2, backoff = @Backoff(delay = HUNDERED_MS), noRetryFor = {BusinessException.class,
+//            HttpClientErrorException.class})
+    public ResponseEntity<String> timeLimiter2() throws Exception {
+        System.err.println("date:"+new Date());
+       throw new BadRequestException();
+    }
+    
+    //we can add @CircuitBreaker(name = "memberService") at class level,in such case we can add fallback as below
+    //fallback method,copy the actual method signature,just add Fallback to the actual method and RuntimeException ex in inputs 
+//  @Recover
+////  public Optional<MemberServiceResponse> validateMemberCodeFallback(RuntimeException ex, String partnerCode) {
+//      public Optional<MemberServiceResponse> validateMemberCodeFallback(RuntimeException ex, String partnerCode) {
+//  }
+    
+    public ResponseEntity<String> showError(Exception ex) {
+        System.err.println("###### This is default Response ####");
+        return new ResponseEntity<String>("This is default response", HttpStatus.OK);
     }
 
 }

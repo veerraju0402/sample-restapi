@@ -1,22 +1,17 @@
 server:
  port: 8081
-
-logging:
-  enabled: true
-  display-headers: true
-  display-request-headers: accept, content-type
-  display-response-headers: accept, content-type
-  level:
-    ROOT: WARN
-    com.ftd: DEBUG
+ # 8089 for actuator
 
 
 spring:
   application:
     name: demoapp
     
+#    http://localhost:8081/h2-console/ 
   datasource:
     url: jdbc:h2:mem:testdb
+#    url: jdbc:h2:file:./data/app_db
+#    url: jdbc:h2:D:/sampledata 
     username: sa
     password: password
     driverClassName: org.h2.Driver
@@ -29,65 +24,99 @@ spring:
 #    mongodb:
 #      uri: https://data.mongodb-api.com/app/data-mcusr/endpoint/data/beta
  
-  main:
-    allow-bean-definition-overriding: true
+#resilance 4j circuit breker,retry,bulk head
+#https://github.com/codefarm0/resilience4j/blob/master/orderManagementApp/src/main/resources/application.yml
+#resilience4j.ratelimiter:
+#  instances:
+#    service1:
+#      limitForPeriod: 5
+#      limitRefreshPeriod: 10
+#      timeoutDuration: 1000ms
 
-service:
-  metrics:
-    dropwizard:
-      enabled: false
-    prometheus:
-      enabled: false
-    jmx:
-      enabled: true
-  git:
-    enabled: true
-  https:
-    enabled: true
-  rest:
-    enabled: false
-    http-connection-config:
-      customRestTemplate:
-        max: 300
-        perRoute: 100
-        validateInactivity: 5000
-        ssl:
-          trustAllCertificates: true
-        monitor:
-          enabled: false
-          intervalSec: 30
-        retryEnabled: false
-        timeout:
-          socket: 3000
-          connect: 1000
-          ttlSec: 600
-          request: 15000
+resilience4j.retry:
+  instances:
+    allCustomer:
+      max-attempts: 3
+      waitDuration: 10s
+      enableExponentialBackoff: true
+resilience4j.circuitbreaker:
+  instances:
+    default:
+      minimumNumberOfCalls: 25
 
-management:
-  endpoints:
-    web:
-      base-path: /
-      exposure:
-        include: '*'
-  metrics:
-    export:
-      prometheus:
-        enabled: true
-  security:
-    enabled: false
-  health:
-    redis:
-      enabled: false
-    mail:
-      enabled: false
-  endpoint:
-    restart:
-      enabled: true
+resilience4j.timelimiter:
+  instances:
+    myTimeLim:
+      timeoutDuration: 2s
 
-authorization:
-    enabled: false
+resilience4j.ratelimiter:
+  instances:
+    service1:
+      limitForPeriod: 4
+      limitRefreshPeriod: 10s
+      timeoutDuration: 2s
 
-filter:
-  includeUrls:
-    adminUrls: /.*/employees/.*$
-  enabled: true
+resilience4j.bulkhead:
+  instances:
+    mycalls:
+      maxConcurrentCalls: 5
+#      maxWaitDuration: 1000
+
+
+#service:
+#  metrics:
+#    dropwizard:
+#      enabled: false
+#    prometheus:
+#      enabled: true
+#    jmx:
+#      enabled: true
+#  git:
+#    enabled: true
+#  https:
+#    enabled: true
+#  rest:
+#    enabled: false
+#    http-connection-config:
+#      customRestTemplate:
+#        max: 300
+#        perRoute: 100
+#        validateInactivity: 5000
+#        ssl:
+#          trustAllCertificates: true
+#        monitor:
+#          enabled: false
+#          intervalSec: 30
+#        retryEnabled: false
+#        timeout:
+#          socket: 3000
+#          connect: 1000
+#          ttlSec: 600
+#          request: 15000
+#
+#management:
+#  endpoints:
+#    web:
+#      base-path: /
+#      exposure:
+#        include: "*"
+#  tracing:
+#    propagation:
+#      type: B3
+#  prometheus:
+#    metrics:
+#      export:
+#        enabled: true
+
+
+info:
+  application:
+    name : springboot-actuator
+    Description : Spring Boot Actuator 2.x Enhancement
+    artifact : springboot-actuator
+    version : 0.0.1-SNAPSHOT
+  techstack:
+    java : open jdk 8
+    spring boot : 2.4.2
+    angular : 8
+    database : MySQL

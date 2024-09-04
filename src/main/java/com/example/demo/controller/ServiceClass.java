@@ -4,10 +4,14 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.controller.exception.MyCustomException;
 import com.example.demo.controller.exception.MyCustomException2;
+
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 
 @Service
 public class ServiceClass {
@@ -37,6 +41,11 @@ public class ServiceClass {
 
     public void deleteEmployee(long id) {
         myRepositry.deleteById(id);
+    }
+
+    public Page<Employee> findAll(Pageable contactsPageable) {
+        // TODO Auto-generated method stub
+        return myRepositry.findAll(contactsPageable);
     }
 
 }

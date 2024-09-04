@@ -48,11 +48,12 @@ public class LoggingAdvice {
         log.info("method invoked " + className + " : " + methodName + "()" + "arguments : "
                 + mapper.writeValueAsString(array));
         Object object = pjp.proceed();
-        log.info(className + " : " + methodName + "()" + "Response : " + mapper.writeValueAsString(object));
+        log.info("className:"+className + " : " + methodName + "()" + "Response : " + mapper.writeValueAsString(object));
         return object;
     }
 
     // https://www.youtube.com/watch?v=2YTGgHkJg2M&list=RDCMUCORuRdpN2QTCKnsuEaeK-kQ&start_radio=1&rv=2YTGgHkJg2M&t=697
+    //custom annotation
     @Around("@annotation(com.example.demo.aopadvice.TrackExecutionTime)")
     public Object trackTime(ProceedingJoinPoint pjp) throws Throwable {
         long stratTime=System.currentTimeMillis();
@@ -73,4 +74,24 @@ public class LoggingAdvice {
 //        System.out.println(
 //                ".............Looking for @Around advice, if none is there, @After will be called after @Before(if available). My role is to execute after each and every method.............");
 //    }
+    
+    
+    
+//    @Pointcut(" @within(org.springframework.web.bind.annotation.RestController)")
+//    public void restControllers() {}
+//
+//    @Pointcut("@annotation(org.springframework.web.bind.annotation.RequestMapping) " +
+//        "|| @annotation(org.springframework.web.bind.annotation.GetMapping)" +
+//        "|| @annotation(org.springframework.web.bind.annotation.PostMapping)" +
+//        "|| @annotation(org.springframework.web.bind.annotation.PatchMapping)" +
+//        "|| @annotation(org.springframework.web.bind.annotation.PutMapping)" +
+//        "|| @annotation(org.springframework.web.bind.annotation.DeleteMapping)"
+//    )
+//    public void mappingAnnotations() {}
+//
+//    @Pointcut("execution(@(@org.springframework.web.bind.annotation.RequestMapping *) * *(..))")
+//    public void requestMappingAnnotations() { }
+//
+//    @Before("restControllers() && requestMappingAnnotations()")
+//    public void onExecute(JoinPoint jp) {}
 }
