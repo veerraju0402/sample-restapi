@@ -35,6 +35,7 @@ import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
@@ -227,6 +228,31 @@ public class ControllerClass {
     public ResponseEntity<String> showError(Exception ex) {
         System.err.println("###### This is default Response ####");
         return new ResponseEntity<String>("This is default response", HttpStatus.OK);
+    }
+    
+    
+    ////changinging rate limiter at runtime
+    @Autowired
+    private RateLimiterRegistry registry;
+    
+    
+    @GetMapping("/updateRateLimiter") 
+    public String updateRatelimiter() {
+        updateRateLimits("service1", 2, Duration.ofSeconds(2));
+        return "updated";
+    }
+    
+    public void updateRateLimits(String rateLimiterName, int newLimitForPeriod, Duration newTimeoutDuration) {
+        io.github.resilience4j.ratelimiter.RateLimiter limiter = registry.rateLimiter(rateLimiterName);
+        limiter.changeLimitForPeriod(newLimitForPeriod);
+        limiter.changeTimeoutDuration(newTimeoutDuration);
+      }
+    
+    
+    ///
+    @GetMapping(value = "/employee4")
+    public List<Employee> firstService4(@RequestParam String id) {
+        return serviceClass.getEmployee3(id);
     }
 
 }

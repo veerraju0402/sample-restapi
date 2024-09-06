@@ -20,6 +20,12 @@ spring:
   h2:
     console.enabled: true
 
+service:
+  datastore:
+    credentials: classpath:my-database-id-d508a3efd3ba.json
+    namespace: my-gcp.collection
+    project-id: my-database-id
+
 #  data:
 #    mongodb:
 #      uri: https://data.mongodb-api.com/app/data-mcusr/endpoint/data/beta
