@@ -1,6 +1,9 @@
 package com.example.demo.controller;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -34,19 +37,26 @@ import reactor.netty.internal.util.MapUtils;
 import com.google.api.core.ApiFuture;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.WriteChannel;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
 import com.google.cloud.firestore.WriteResult;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
 
 @Service
 public class ServiceClass {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceClass.class);
-
+    private static final int BYTE_LENGTH = 10_240;
+    
     @Autowired
     MyRepositry myRepositry;
 //    @Autowired
 //    GCPDataStore gCPDataStore;
+    @Autowired
+    private Storage storage;
     private EntityManager entityManager;
 
     public EntityManager getEntityManager() {
@@ -94,6 +104,7 @@ public class ServiceClass {
     }
 
     public Employee getEmployee2(long id) {
+        
         return myRepositry.findById(id).orElseThrow(() -> new MyCustomException2(id));
     }
 
@@ -154,6 +165,37 @@ public class ServiceClass {
             QueryResponse<Employee> response = entityManager.executeEntityQueryRequest(Employee.class, request);
             System.err.println("response:"+response);
             return response.getResults();
+    }
+    
+    
+    public void uploadFile(byte[] content, String bucketName, String fileName, String fileType) {
+        try {
+              BlobId blobId = BlobId.of(bucketName, fileName);
+              BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
+                                          .setContentType(fileType)
+                                          .build();
+              //Blob blob = storage.create(blobInfo, content);
+              uploadToStorage(storage, content, blobInfo);
+              LOGGER.info("Successfully uploaded file to bucket :: {} , blobName :: {}", bucketName,
+                          fileName);
+            } catch (Exception ex) {
+                LOGGER.error("Failed to upload file to bucket :: {} , blobName :: {}", bucketName,
+                      fileName, ex);
+          }
+      }
+    
+    public void uploadToStorage(Storage storage, byte[] bytes, BlobInfo blobInfo) throws IOException {
+        try (WriteChannel writer = storage.writer(blobInfo)) {
+            byte[] buffer = new byte[BYTE_LENGTH];
+            try (InputStream input = new ByteArrayInputStream(bytes)) {
+                int limit;
+                while ((limit = input.read(buffer)) >= 0) {
+                    writer.write(ByteBuffer.wrap(buffer, 0, limit));
+                }
+          }
+        } catch (Exception e) {
+            LOGGER.info("Unable to upload to storage {}", e);
+         }
     }
 
 }

@@ -1,0 +1,48 @@
+#all runtime configs
+service:
+  var: avr2
+  var2: fromRuntime2
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+service:
+  var: avr3
+  var2: fromRuntime3
+---
+spring:
+  config:
+    activate:
+      on-profile: dev1
+
+service:
+  var: avr4
+  var2: fromRuntime4
+
+---
+spring:
+  config:
+    activate:
+      on-profile: qa1
+
+service:
+  var: avr5
+---
+spring:
+  config:
+    activate:
+      on-profile: stag1 | stag2
+
+service:
+  var: avr6
+---
+spring:
+  config:
+    activate:
+      on-profile: prod1 | prod2 | prod3 | prod4
+
+service:
+  var: avr7

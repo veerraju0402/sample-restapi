@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -53,9 +54,16 @@ public class ControllerClass {
     @Autowired
     private ApplicationContext applicationContext;
     private Bucket bucket;
-    
+
 //    @Autowired
 //    private HttpServletRequest httpServletRequest;
+    
+    
+    @Value("${service.var}")
+    private String var;
+    
+    @Value("${service.var2}")
+    private String var2;
 
     @GetMapping("/")
     @Hidden
@@ -63,7 +71,7 @@ public class ControllerClass {
         response.sendRedirect("/swagger-ui.html");
     }
 
-    //custome annotation in aop which executes in filter for every request
+    // custome annotation in aop which executes in filter for every request
     @TrackExecutionTime
     @GetMapping("/now")
     public Date dkd() {
@@ -71,63 +79,63 @@ public class ControllerClass {
 //        System.out.println("testBean:" + testBean);
         return testBean;
     }
-    
-    //rate limit
-    //https://www.youtube.com/watch?v=HYg6l0pUQwM
+
+    // rate limit
+    // https://www.youtube.com/watch?v=HYg6l0pUQwM
     @GetMapping(value = "/rateLimit1")
     public ResponseEntity<String> welCome1(@RequestParam(value = "id", required = false, defaultValue = "5") long id) {
 
         Refill refill = Refill.intervally(id /* noOfReqs */, Duration.ofMinutes(1));
 //        Refill refill =Refill.of(5, Duration.ofMinutes(1));
-        bucket=Bucket.builder().addLimit(Bandwidth.classic(id, refill)).build();
-        return new ResponseEntity<String>("successfully generated string:"+bucket,HttpStatus.OK);
+        bucket = Bucket.builder().addLimit(Bandwidth.classic(id, refill)).build();
+        return new ResponseEntity<String>("successfully generated string:" + bucket, HttpStatus.OK);
     }
-    
+
     @GetMapping(value = "/msg")
     public ResponseEntity<String> welCome() throws InterruptedException {
-        if(bucket.tryConsume(1)) {
-            return new ResponseEntity<String>("successfully",HttpStatus.OK);
+        if (bucket.tryConsume(1)) {
+            return new ResponseEntity<String>("successfully", HttpStatus.OK);
         }
-        return new ResponseEntity<String>("Too many requess",HttpStatus.OK);
+        return new ResponseEntity<String>("Too many requess", HttpStatus.OK);
     }
-    
-  //ratelimiting from yml is not working
+
+    // ratelimiting from yml is not working
     @GetMapping(value = "/msg1")
     @RateLimiter(name = "service1", fallbackMethod = "welCome3")
     public ResponseEntity<String> welCome2() throws InterruptedException {
-      System.err.println("Test");
-        return new ResponseEntity<String>("hello",HttpStatus.OK);
+        System.err.println("Test");
+        return new ResponseEntity<String>(var2+"-hello:"+var, HttpStatus.OK);
     }
-    
+
     @PostMapping(value = "/msg2")
-     public ResponseEntity<String> welCome3(@RequestParam String msg)  {
-       System.err.println("Test:"+msg);
-         return new ResponseEntity<String>("hello:"+msg,HttpStatus.OK);
-     }
+    public ResponseEntity<String> welCome3(@RequestParam String msg) {
+        System.err.println("Test:" + msg);
+        return new ResponseEntity<String>("hello:" + msg, HttpStatus.OK);
+    }
 
     @GetMapping(value = "/employee", produces = { "application/xml" })
 //    @GetMapping(value = "/employee", produces = { "application/json","application/xml" })
 //    @GetMapping(value = "/employee")
     public Optional<Employee> firstService(@RequestParam long id) {
-        if(id<1) {
-            Employee employee=new Employee();
+        if (id < 1) {
+            Employee employee = new Employee();
             employee.setName("raju");
             employee.setEmail("raju@gmail.com");
             return Optional.of(employee);
         }
         return serviceClass.getEmployee(id);
     }
-    
+
     @GetMapping(value = "/employee1")
     public Employee firstService1(@RequestParam long id) {
         return serviceClass.getEmployee1(id);
     }
-    
+
     @GetMapping(value = "/employee2")
     public Employee firstService2(@RequestParam long id) {
         return serviceClass.getEmployee2(id);
     }
-    
+
     @GetMapping(value = "/employee3/{id}")
     public Employee firstService3(@PathVariable long id) {
         return serviceClass.getEmployee2(id);
@@ -137,14 +145,15 @@ public class ControllerClass {
     @RequestMapping(value = "/employee", method = RequestMethod.POST)
     public Employee secondService(@RequestBody Employee employee) {
 //        StringBuffer g=httpServletRequest.getRequestURL();
-       // System.out.println(g+"--Inside POST Method:" + httpServletRequest.getHeader("testHead"));
-      try {
-          System.out.println("Post");
-        return serviceClass.saveEmployee(employee);
-      }catch(Exception e) {
-          System.out.println("Exc:"+e.getMessage());
-          throw e;
-      }
+        // System.out.println(g+"--Inside POST Method:" +
+        // httpServletRequest.getHeader("testHead"));
+        try {
+            System.out.println("Post");
+            return serviceClass.saveEmployee(employee);
+        } catch (Exception e) {
+            System.out.println("Exc:" + e.getMessage());
+            throw e;
+        }
     }
 
 //    @TrackExecutionTime
@@ -152,15 +161,15 @@ public class ControllerClass {
     @RateLimiter(name = "service1", fallbackMethod = "dkd")
     public Page<Employee> firstService(@RequestParam int pageNumber) {
         System.out.println("Get");
-        if(pageNumber>=0) {
-        Pageable contactsPageable = PageRequest.of(pageNumber, 3,Sort.by("empId").descending());
-        
-        Page<Employee> ePages=serviceClass.findAll(contactsPageable);
-        
-        return ePages;
-        }else {
-           List<Employee> eList= serviceClass.getEmployees();
-            Page<Employee>  empPage=new PageImpl<Employee>(eList);
+        if (pageNumber >= 0) {
+            Pageable contactsPageable = PageRequest.of(pageNumber, 3, Sort.by("empId").descending());
+
+            Page<Employee> ePages = serviceClass.findAll(contactsPageable);
+
+            return ePages;
+        } else {
+            List<Employee> eList = serviceClass.getEmployees();
+            Page<Employee> empPage = new PageImpl<Employee>(eList);
             return (Page<Employee>) eList;
         }
     }
@@ -180,79 +189,83 @@ public class ControllerClass {
         }
         return employees;
     }
-    
-    public ResponseEntity<String> rateLimiterFallback(Exception e){
-        System.err.println("e:"+e.getMessage());
+
+    public ResponseEntity<String> rateLimiterFallback(Exception e) {
+        System.err.println("e:" + e.getMessage());
         return new ResponseEntity<String>("order service does not permit further calls", HttpStatus.TOO_MANY_REQUESTS);
 
     }
-    
-    
-    //https://www.youtube.com/watch?v=CNGScm944Vs
-    //https://www.youtube.com/watch?v=uwTWJHREhI8
+
+    // https://www.youtube.com/watch?v=CNGScm944Vs
+    // https://www.youtube.com/watch?v=uwTWJHREhI8
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
             try {
-                //Thread.sleep(3000);
+                // Thread.sleep(3000);
                 System.out.println("Hello World");
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     };
-    
-    @GetMapping("/timelimiter") //http://localhost:9094/api/reports/timelimiter
+
+    @GetMapping("/timelimiter") // http://localhost:9094/api/reports/timelimiter
     @TimeLimiter(name = "myTimeLim")
     public CompletableFuture<Void> timeLimiter() {
         return CompletableFuture.runAsync(runnable);
     }
-    
-    @GetMapping("/timelimiter2") //http://localhost:9094/api/reports/timelimiter
+
+    @GetMapping("/timelimiter2") // http://localhost:9094/api/reports/timelimiter
     @Retry(name = "allCustomer", fallbackMethod = "showError")
 //    import org.springframework.retry.annotation.Retryable;
 //    @Retryable(maxAttempts = 2, backoff = @Backoff(delay = HUNDERED_MS), noRetryFor = {BusinessException.class,
 //            HttpClientErrorException.class})
     public ResponseEntity<String> timeLimiter2() throws Exception {
-        System.err.println("date:"+new Date());
-       throw new BadRequestException();
+        System.err.println("date:" + new Date());
+        throw new BadRequestException();
     }
-    
-    //we can add @CircuitBreaker(name = "memberService") at class level,in such case we can add fallback as below
-    //fallback method,copy the actual method signature,just add Fallback to the actual method and RuntimeException ex in inputs 
+
+    // we can add @CircuitBreaker(name = "memberService") at class level,in such
+    // case we can add fallback as below
+    // fallback method,copy the actual method signature,just add Fallback to the
+    // actual method and RuntimeException ex in inputs
 //  @Recover
 ////  public Optional<MemberServiceResponse> validateMemberCodeFallback(RuntimeException ex, String partnerCode) {
 //      public Optional<MemberServiceResponse> validateMemberCodeFallback(RuntimeException ex, String partnerCode) {
 //  }
-    
+
     public ResponseEntity<String> showError(Exception ex) {
         System.err.println("###### This is default Response ####");
         return new ResponseEntity<String>("This is default response", HttpStatus.OK);
     }
-    
-    
-    ////changinging rate limiter at runtime
+
+    //// changinging rate limiter at runtime
     @Autowired
     private RateLimiterRegistry registry;
-    
-    
-    @GetMapping("/updateRateLimiter") 
+
+    @GetMapping("/updateRateLimiter")
     public String updateRatelimiter() {
         updateRateLimits("service1", 2, Duration.ofSeconds(2));
         return "updated";
     }
-    
+
     public void updateRateLimits(String rateLimiterName, int newLimitForPeriod, Duration newTimeoutDuration) {
         io.github.resilience4j.ratelimiter.RateLimiter limiter = registry.rateLimiter(rateLimiterName);
         limiter.changeLimitForPeriod(newLimitForPeriod);
         limiter.changeTimeoutDuration(newTimeoutDuration);
-      }
-    
-    
+    }
+
     ///
     @GetMapping(value = "/employee4")
     public List<Employee> firstService4(@RequestParam String id) {
         return serviceClass.getEmployee3(id);
     }
 
+    @GetMapping(value = "/fileupload")
+    public String firstService5(@RequestParam long id) {
+        Employee emp = serviceClass.getEmployee2(id);
+        serviceClass.uploadFile(emp.toString().getBytes(), "tax-rates-scheduler-dev", "myFileName", "text/csv");
+        return "uploaded";
+    }
 }

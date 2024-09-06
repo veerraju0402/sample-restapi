@@ -25,6 +25,7 @@ service:
     credentials: classpath:my-database-id-d508a3efd3ba.json
     namespace: my-gcp.collection
     project-id: my-database-id
+  var: avr1
 
 #  data:
 #    mongodb:
