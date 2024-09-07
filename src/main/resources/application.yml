@@ -6,6 +6,24 @@ server:
 spring:
   application:
     name: demoapp
+  config:
+    import: classpath:application-runtime.yml
+  profiles:
+    active: local
+  output:
+    ansi:
+      enabled: ALWAYS
+  cloud:
+    config:
+      enabled: true
+    gcp:
+      credentials:
+        location: classpath:my-database-id-96ce6cc95823.json
+      storage:
+        enabled: true
+    kubernates:
+      reload:
+        enabled: true
     
 #    http://localhost:8081/h2-console/ 
   datasource:
@@ -22,10 +40,13 @@ spring:
 
 service:
   datastore:
-    credentials: classpath:my-database-id-d508a3efd3ba.json
+    credentials: classpath:my-database-id-96ce6cc95823.json
     namespace: my-gcp.collection
     project-id: my-database-id
   var: avr1
+  var3: ${service.var4}
+  logging:
+    enabled: true
 
 #  data:
 #    mongodb:

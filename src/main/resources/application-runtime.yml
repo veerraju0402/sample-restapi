@@ -1,7 +1,7 @@
 #all runtime configs
 service:
-  var: avr2
   var2: fromRuntime2
+  var4: mapping
 
 ---
 spring:
