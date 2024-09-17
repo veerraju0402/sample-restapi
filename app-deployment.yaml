@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: sample-rest-service
-          image: sample-rest-service:1.0
+          image: gcr.io/myjavadeployment/sample-rest-service:v1
           ports:
             - containerPort: 8080
           env:   # Setting Enviornmental Variables
