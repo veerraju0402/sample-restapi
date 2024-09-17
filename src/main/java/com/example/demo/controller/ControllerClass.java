@@ -44,7 +44,6 @@ import io.github.resilience4j.retry.annotation.Retry;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @CrossOrigin("http://localhost:3000")
@@ -191,7 +190,7 @@ public class ControllerClass {
 	}
 
 	@DeleteMapping(value = "/employee")
-	public String deleteService(@RequestParam long id) {
+	public String deleteService(@RequestParam(required=false, defaultValue = "0") long id) {
 		serviceClass.deleteEmployee(id);
 		return "Deleted";
 	}

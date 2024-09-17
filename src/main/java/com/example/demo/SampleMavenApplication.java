@@ -13,31 +13,47 @@ import jakarta.annotation.PostConstruct;
 @SpringBootApplication
 @AutoConfiguration
 public class SampleMavenApplication {
-    @Autowired
-    private MyRepositry serviceClass;
-    
-    @PostConstruct
-    public  void saveDefaultUser(){
-        for(int i=0;i<8;i++) {
-            Employee employee=new Employee();
-            employee.setEmpId(i);
-            employee.setName("raju");
-            employee.setEmail("raju@gmail.com");
-            serviceClass.save(employee);
-        }
-    }
+	@Autowired
+	private MyRepositry serviceClass;
 
-    public static void main(String[] args) {
-        SpringApplication.run(SampleMavenApplication.class, args);
-    }
+	@PostConstruct
+	public void saveDefaultUser() {
+		for (int i = 1; i < 8; i++) {
+			Employee employee = new Employee();
+			employee.setEmpId(i);
+			employee.setName("raju");
+			employee.setEmail("raju@gmail.com");
+			serviceClass.save(employee);
+		}
+	}
+
+	public static void main(String[] args) {
+		SpringApplication.run(SampleMavenApplication.class, args);
+
+//        Runtime.getRuntime().addShutdownHook(new Thread() 
+//        { 
+//          public void run() 
+//          { 
+//            System.out.println("Shutdown Hook is running !"); 
+//            SampleMavenApplication te=new SampleMavenApplication();
+//            te.deleteCall();
+//            System.out.println("Application Terminating ..."); 
+//          } 
+//        }); 
+
+	}
+
+	public void deleteCall() {
+		serviceClass.deleteAll();
+	}
 
 //    @Bean // for filter ratelimiter
 //    ProxyManager<String> proxyManager(CacheManager cacheManager) {
 //        return new JCacheProxyManager<>(cacheManager.getCache("cache"));
 //    }
 
-    //https://www.youtube.com/watch?v=t1_RbTb3BUo
-    //	public HttpTraceRepositry httpTraces() { //for custor actuator 
-    //	    return new InMemoryHttpTraceRepositry();
-    //	}
+	// https://www.youtube.com/watch?v=t1_RbTb3BUo
+	// public HttpTraceRepositry httpTraces() { //for custor actuator
+	// return new InMemoryHttpTraceRepositry();
+	// }
 }

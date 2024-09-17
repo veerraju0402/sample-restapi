@@ -109,7 +109,11 @@ public class ServiceClass {
 	}
 
 	public void deleteEmployee(long id) {
+		if(id<1) {
+			myRepositry.deleteAll();
+		} else {
 		myRepositry.deleteById(id);
+		}
 	}
 
 	public Page<Employee> findAll(Pageable contactsPageable) {
