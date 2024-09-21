@@ -46,7 +46,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
-@CrossOrigin("http://localhost:3000")
+@CrossOrigin("http://localhost:3001")
 public class ControllerClass {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ControllerClass.class);
