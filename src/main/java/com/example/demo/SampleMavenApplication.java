@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 
 import com.example.demo.controller.Employee;
 import com.example.demo.controller.MyRepositry;
@@ -11,7 +13,11 @@ import com.example.demo.controller.MyRepositry;
 import jakarta.annotation.PostConstruct;
 
 @SpringBootApplication
-@AutoConfiguration
+//@PropertySources({
+//    @PropertySource(value = "mysql-configMap.yaml"),
+//    @PropertySource(value = "app-deployment.yaml"),
+//    @PropertySource(value = "db-deployment.yml")})
+//@AutoConfiguration
 public class SampleMavenApplication {
 	@Autowired
 	private MyRepositry serviceClass;

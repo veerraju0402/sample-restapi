@@ -26,34 +26,39 @@ spring:
         enabled: true
     
 #    http://localhost:8081/h2-console/ 
-#  datasource:
-#    url: jdbc:h2:mem:testdb
-##    url: jdbc:h2:file:./data/app_db
-##    url: jdbc:h2:D:/sampledata 
-#    username: sa
-#    password: password
-#    driverClassName: org.h2.Driver
-#  jpa:
-#    database-platform: org.hibernate.dialect.H2Dialect
-#  h2:
-#    console.enabled: true
-
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:h2:mem:testdb
+#    url: jdbc:h2:file:./data/app_db
+#    url: jdbc:h2:D:/sampledata 
+    username: sa
+    password: password
+    driverClassName: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+  h2:
+    console.enabled: true
+
+#  datasource:
+#    driver-class-name: com.mysql.jdbc.Driver
 #    url: jdbc:mysql://${DB_HOST}/${DB_NAME}?useSSL=false
 #    username: ${DB_USERNAME}
 #    password: ${DB_PASSWORD}
-    url: jdbc:mysql://localhost:3306/mydb1?useSSL=false
-    username: root
-    password: root
-#    hikari:
-#      initialization-fail-timeout: 0
-  jpa:
-#    database-platform: org.hibernate.dialect.MySQL5Dialect
-    generate-ddl: true
-    show-sql: true
-    hibernate:
-      ddl-auto: update
+##    url: jdbc:mysql://localhost:3306/mydb1?useSSL=false
+##    url: jdbc:mysql://google/mydb1?cloudSqlInstance=myjavadeployment:asia-south1:my-sqldb&socketFactory=com.google.cloud.sql.mysql.SocketFactory
+##    username: root
+##    password: root
+##    hikari:
+##      initialization-fail-timeout: 0
+#  jpa:
+##    database-platform: org.hibernate.dialect.MySQL5Dialect
+#    generate-ddl: true
+#   show-sql: true
+#    hibernate:
+#      ddl-auto: update
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.MySQL8Dialect
+#        default_schema: public
 
 service:
   datastore:

@@ -3,5 +3,5 @@ kind : ConfigMap
 metadata:
   name : db-config
 data:
-  host : mysql
+  host : localhost #mysql
   dbName: mydb1

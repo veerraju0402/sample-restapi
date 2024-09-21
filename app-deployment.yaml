@@ -19,7 +19,7 @@ spec:
             - containerPort: 8080
           env:   # Setting Enviornmental Variables
             - name: DB_HOST   # Setting Database host address from configMap
-              value: mysql
+              value: localhost
 #              valueFrom :
 #                configMapKeyRef :
 #                  name : db-config
