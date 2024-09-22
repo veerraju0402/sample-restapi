@@ -23,9 +23,9 @@ import org.springframework.stereotype.Service;
 import com.example.demo.controller.exception.MyCustomException;
 import com.example.demo.controller.exception.MyCustomException2;
 import com.google.cloud.WriteChannel;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
+//import com.google.cloud.storage.BlobId;
+//import com.google.cloud.storage.BlobInfo;
+//import com.google.cloud.storage.Storage;
 import com.jmethods.catatumbo.EntityManager;
 import com.jmethods.catatumbo.EntityManagerFactory;
 import com.jmethods.catatumbo.EntityQueryRequest;
@@ -43,17 +43,17 @@ public class ServiceClass {
 	// @Autowired
 	// GCPDataStore gCPDataStore;
 
-	private Storage storage;
+//	private Storage storage;
 	private EntityManager entityManager;
 	
 
-	public Storage getStorage() {
-		return storage;
-	}
-
-	public void setStorage(Storage storage) {
-		this.storage = storage;
-	}
+//	public Storage getStorage() {
+//		return storage;
+//	}
+//
+//	public void setStorage(Storage storage) {
+//		this.storage = storage;
+//	}
 
 	public EntityManager getEntityManager() {
 		return entityManager;
@@ -172,30 +172,30 @@ public class ServiceClass {
 		return null;
 	}
 
-	public void uploadFile(byte[] content, String bucketName, String fileName, String fileType) {
-		try {
-			BlobId blobId = BlobId.of(bucketName, fileName);
-			BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(fileType).build();
-			// Blob blob = storage.create(blobInfo, content);
-			uploadToStorage(storage, content, blobInfo);
-			LOGGER.info("Successfully uploaded file to bucket :: {} , blobName :: {}", bucketName, fileName);
-		} catch (Exception ex) {
-			LOGGER.error("Failed to upload file to bucket :: {} , blobName :: {}", bucketName, fileName, ex);
-		}
-	}
-
-	public void uploadToStorage(Storage storage, byte[] bytes, BlobInfo blobInfo) throws IOException {
-		try (WriteChannel writer = storage.writer(blobInfo)) {
-			byte[] buffer = new byte[BYTE_LENGTH];
-			try (InputStream input = new ByteArrayInputStream(bytes)) {
-				int limit;
-				while ((limit = input.read(buffer)) >= 0) {
-					writer.write(ByteBuffer.wrap(buffer, 0, limit));
-				}
-			}
-		} catch (Exception e) {
-			LOGGER.info("Unable to upload to storage {}", e);
-		}
-	}
+//	public void uploadFile(byte[] content, String bucketName, String fileName, String fileType) {
+//		try {
+//			BlobId blobId = BlobId.of(bucketName, fileName);
+//			BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(fileType).build();
+//			// Blob blob = storage.create(blobInfo, content);
+//			uploadToStorage(storage, content, blobInfo);
+//			LOGGER.info("Successfully uploaded file to bucket :: {} , blobName :: {}", bucketName, fileName);
+//		} catch (Exception ex) {
+//			LOGGER.error("Failed to upload file to bucket :: {} , blobName :: {}", bucketName, fileName, ex);
+//		}
+//	}
+//
+//	public void uploadToStorage(Storage storage, byte[] bytes, BlobInfo blobInfo) throws IOException {
+//		try (WriteChannel writer = storage.writer(blobInfo)) {
+//			byte[] buffer = new byte[BYTE_LENGTH];
+//			try (InputStream input = new ByteArrayInputStream(bytes)) {
+//				int limit;
+//				while ((limit = input.read(buffer)) >= 0) {
+//					writer.write(ByteBuffer.wrap(buffer, 0, limit));
+//				}
+//			}
+//		} catch (Exception e) {
+//			LOGGER.info("Unable to upload to storage {}", e);
+//		}
+//	}
 
 }

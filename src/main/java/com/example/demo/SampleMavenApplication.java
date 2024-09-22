@@ -2,10 +2,7 @@ package com.example.demo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
 
 import com.example.demo.controller.Employee;
 import com.example.demo.controller.MyRepositry;
@@ -36,16 +33,16 @@ public class SampleMavenApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SampleMavenApplication.class, args);
 
-//        Runtime.getRuntime().addShutdownHook(new Thread() 
-//        { 
-//          public void run() 
-//          { 
-//            System.out.println("Shutdown Hook is running !"); 
-//            SampleMavenApplication te=new SampleMavenApplication();
-//            te.deleteCall();
-//            System.out.println("Application Terminating ..."); 
-//          } 
-//        }); 
+		// Runtime.getRuntime().addShutdownHook(new Thread()
+		// {
+		// public void run()
+		// {
+		// System.out.println("Shutdown Hook is running !");
+		// SampleMavenApplication te=new SampleMavenApplication();
+		// te.deleteCall();
+		// System.out.println("Application Terminating ...");
+		// }
+		// });
 
 	}
 
@@ -53,13 +50,20 @@ public class SampleMavenApplication {
 		serviceClass.deleteAll();
 	}
 
-//    @Bean // for filter ratelimiter
-//    ProxyManager<String> proxyManager(CacheManager cacheManager) {
-//        return new JCacheProxyManager<>(cacheManager.getCache("cache"));
-//    }
+	// @Bean // for filter ratelimiter
+	// ProxyManager<String> proxyManager(CacheManager cacheManager) {
+	// return new JCacheProxyManager<>(cacheManager.getCache("cache"));
+	// }
 
 	// https://www.youtube.com/watch?v=t1_RbTb3BUo
 	// public HttpTraceRepositry httpTraces() { //for custor actuator
 	// return new InMemoryHttpTraceRepositry();
+	// }
+
+	// @Bean
+	// public PubSubTemplate pubSubTemplate(PubSubPublisherTemplate
+	// pubSubPublisherTemplate,
+	// PubSubSubscriberTemplate pubSubSubscriberTemplate) {
+	// return new PubSubTemplate(pubSubPublisherTemplate, pubSubSubscriberTemplate);
 	// }
 }

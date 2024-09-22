@@ -18,7 +18,7 @@ spring:
       enabled: true
     gcp:
       credentials:
-        location: classpath:my-database-id-96ce6cc95823.json
+        location: classpath:myjavadeployment-1de48cd5d67a.json
       storage:
         enabled: true
     kubernates:
@@ -36,7 +36,10 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
   h2:
-    console.enabled: true
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
 
 #  datasource:
 #    driver-class-name: com.mysql.jdbc.Driver
@@ -59,6 +62,23 @@ spring:
 #      hibernate:
 #        dialect: org.hibernate.dialect.MySQL8Dialect
 #        default_schema: public
+
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: veerraju.a0402@gmail.com
+    password: Raju@1234
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+report:
+  send:
+    email:
+      toList: veerraju.0402@gmail.com
 
 service:
   datastore:

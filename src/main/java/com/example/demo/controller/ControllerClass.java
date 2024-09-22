@@ -43,6 +43,7 @@ import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
@@ -281,11 +282,26 @@ public class ControllerClass {
 		return serviceClass.getEmployee3(id);
 	}
 
-	@GetMapping(value = "/fileupload")
-	public String firstService5(@RequestParam long id) {
-		Employee emp = serviceClass.getEmployee2(id);
-		serviceClass.uploadFile(emp.toString().getBytes(), "tax-rates-scheduler-dev", "myFileName", "text/csv");
-		return "uploaded";
+//	@GetMapping(value = "/fileupload")
+//	public String firstService5(@RequestParam long id) {
+//		Employee emp = serviceClass.getEmployee2(id);
+//		serviceClass.uploadFile(emp.toString().getBytes(), "tax-rates-scheduler-dev", "myFileName", "text/csv");
+//		return "uploaded";
+//	}
+//	
+	
+	////mail
+	@Autowired
+	private com.example.demo.dbConfig1.NotificationService notificationService;
+	
+	
+	
+	@GetMapping(value = "/mail")
+	public String sendMail() throws MessagingException, IOException {
+		LOGGER.info("logger info || mail sent:{}", new Date());
+		notificationService.sendDailyReports();
+		
+		return "mail sent";
 	}
 	 
 //console"   "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
